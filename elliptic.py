@@ -80,7 +80,9 @@ def output_nonzero_p_defects(curve, stop):
     from prime import eratosthenes
 
     primes = eratosthenes(stop)
+    print("\\begin{ttabular}")
     for p in primes:
         defect = curve.count_solutions_mod_p(p) - p
         if defect != 0:
-            print(f"{p}: {defect}")
+            print(f"\\bfseries {p} & {defect} \\\\")
+    print("\\end{ttabular}")
