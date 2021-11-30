@@ -1,4 +1,4 @@
-from math import gcd, isqrt
+import math
 
 
 def eratosthenes(n):
@@ -8,7 +8,7 @@ def eratosthenes(n):
     Returns all such primes as a list.
     """
     sieve = [False, False] + [True] * (n - 1)
-    for i in range(isqrt(n)):
+    for i in range(math.isqrt(n)):
         if not sieve[i]:
             continue
         for j in range(i * i, n + 1, i):
@@ -21,7 +21,7 @@ def is_prime(n):
     n = abs(n)
     if n == 0 or n == 1:
         return False
-    for p in eratosthenes(isqrt(n)):
+    for p in eratosthenes(math.isqrt(n)):
         if n % p == 0:
             return False
     return True
@@ -120,3 +120,33 @@ def write_korselts_list(nums):
     for n in nums:
         print("\\item ", end="")
         korselts(n, True)
+
+
+def pollard(n, output=False):
+    """Use Pollard's p-1 method to try to factor n (only for n=p*q)"""
+
+    def display(*args, **kwargs):
+        if output:
+            print(*args, **kwargs)
+
+    L = 2
+    multiplier = 2
+    while True:
+        display(f"Let's try $L = {multiplier}! = {L}$: ", end="")
+        probe = (pow(2, L, n) + n - 1) % n
+        g = math.gcd(probe, n)
+        display(
+            f"We find $2^L - 1 \\equiv {probe} \\pmod{{{n}}}$, "
+            f"and thus that $\\gcd({n}, {probe}) = {g}",
+            end="",
+        )
+        if g != 1:
+            display(f" \\neq 1$, so we have found the smooth prime $p = {g}$. ", end="")
+            display(f"We can divide into $n$ to get $q = {n // g}$.\n")
+            display(f"Thus, we can factor ${n} = {g} \\cdot {n // g}$.")
+            return g, n // g
+        display("$. This didn't work, so let's try the next value for $L$.\n")
+        multiplier += 1
+        L *= multiplier
+        if multiplier == 12:
+            break
