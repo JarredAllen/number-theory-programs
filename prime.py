@@ -148,5 +148,52 @@ def pollard(n, output=False):
         display("$. This didn't work, so let's try the next value for $L$.\n")
         multiplier += 1
         L *= multiplier
-        if multiplier == 12:
-            break
+
+
+def n_plus_b_squared(n, output=False):
+    """Factor N by looking at N+b^2 values until a perfect square is reached"""
+
+    def display(*args, **kwargs):
+        if output:
+            print(*args, **kwargs)
+
+    b = 1
+    while True:
+        display(f"Let's try $b = {b}$: ", end="")
+        nb2 = n + b ** 2
+        display(f"We find $N+b^2 = {nb2}", end="")
+        if math.isqrt(nb2) ** 2 == nb2:
+            a = math.isqrt(nb2)
+            display(f" = {a}^2$. Thus we find $N = (a+b)(a-b) = {a+b} \\cdot {a-b}$.\n")
+            return a + b, a - b
+        else:
+            display("$, which is not a perfect square, so this didn't work.\n")
+        b += 1
+
+
+def k_n_plus_b_squared(k, n, output=False):
+    """Factor N by looking at k*N+b^2 values until a perfect square is reached"""
+
+    def display(*args, **kwargs):
+        if output:
+            print(*args, **kwargs)
+
+    b = 1
+    while True:
+        display(f"Let's try $b = {b}$: ", end="")
+        knb2 = k * n + b ** 2
+        display(f"We find $k\\cdot N+b^2 = {knb2}", end="")
+        if math.isqrt(knb2) ** 2 == knb2:
+            a = math.isqrt(knb2)
+            display(
+                f" = {a}^2$. Thus we find $k \\cdot N = (a+b)(a-b) = {a+b}"
+                f" \\cdot {a-b}$, ",
+                end="",
+            )
+            f1 = math.gcd(a + b, n)
+            f2 = math.gcd(a - b, n)
+            display(f"so $N = {f1} \\cdot {f2}$.\n")
+            return (f1, f2)
+        else:
+            display("$, which is not a perfect square, so this didn't work.\n")
+        b += 1
