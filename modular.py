@@ -64,7 +64,19 @@ def ModularIntegers(n):
             else:
                 return self.a == other.a and n == other.get_modular_base()
 
-        def get_modular_base(self):
+        def to_nth_root_of_unity(self):
+            """Map to the nth root of unity by the projection homomorphism which maps 1 mod n to exp(2 pi i / n)"""
+            re = math.cos(2 * math.pi * self.a / n)
+            if abs(re) < 1e-12:
+                re = 0
+            im = math.sin(2 * math.pi * self.a / n)
+            if abs(im) < 1e-12:
+                im = 0
+            return complex(re, im)
+
+        @classmethod
+        def get_modular_base(cls):
+            """Get the modulus for this ring"""
             return n
 
         def multiplicative_inverse(self):
@@ -76,6 +88,13 @@ def ModularIntegers(n):
                 return Modular(x)
             else:
                 return -Modular(x)
+
+        @classmethod
+        def natural_project_from(cls, value):
+            """Perform the natural projection into this additive group from the additive group the value is in"""
+            m = n // value.get_modular_base()
+            assert m * value.get_modular_base() != m, "Value is not from a subring"
+            return Modular(value.a * m)
 
         def __str__(self):
             return f"{self.a} mod {n}"
