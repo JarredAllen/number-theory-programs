@@ -65,6 +65,13 @@ def CyclicGroupRing(n):
             """Get the base group that this group ring is over"""
             return base_group
 
+        @classmethod
+        def from_dft(cls, dft):
+            """Get the function with the given DFT"""
+            return cls.from_function(
+                lambda i: sum(d * c(i) for (c, d) in zip(cls.get_characters(), dft)) / n
+            )
+
         def inner_product(self, other):
             """Take the inner product of the two group ring elements"""
             return sum(self(i) * other(i).conjugate() for i in base_group.__iter__())
