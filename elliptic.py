@@ -1,6 +1,6 @@
 from fractions import Fraction
 from jacobi import jacobi
-from modular import ModularIntegers
+from groups import ModularIntegers
 
 
 class EllipticCurve:

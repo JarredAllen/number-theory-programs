@@ -1,4 +1,4 @@
-from modular import ModularIntegers
+from groups import ModularIntegers
 
 
 def complex_zero_approx(c, epsilon=1e-15):
