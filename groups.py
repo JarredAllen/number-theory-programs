@@ -1,6 +1,8 @@
 # Group interface: methods provided on groups in here
 # and <group>.e should be identity
 
+import itertools
+
 
 def CyclicGroup(n):
     """Produce the cyclic group of order n"""
@@ -178,3 +180,136 @@ def DihedralGroup(n):
     Dihedral.r = Dihedral(0, 1)
 
     return Dihedral
+
+
+def SymmetricGroup(n):
+    """Get the symmetric group of order n"""
+    assert n > 0, "Symmetric groups must have positive order"
+
+    class Symmetric:
+        f"The symmetric group of order {n}"
+
+        # Functions to make one
+
+        def __init__(self, values, check=True):
+            """Make a symmetric group from a list of where the numbers 1 through n go
+
+            If check is True, check that this list is a valid permutation
+            """
+            if check:
+                assert len(values) == n and set(values) == set(
+                    [i for i in range(1, n + 1)]
+                )
+            self._values = values
+
+        @classmethod
+        def natural_project_from(cls, value):
+            """Perform the natural projection into this symmetric group from the symmetric group the value is in"""
+            if value.get_order() > n:
+                raise TypeError(f"{value} is not from a subgroup of {cls.__doc__}")
+            return cls.cycle(*value.get_cycles())
+
+        @classmethod
+        def transpose(cls, a, b):
+            """Produce the transposition of the given two elements"""
+            return cls.cycle([a, b])
+
+        @classmethod
+        def cycle(cls, *cycles):
+            """Produce the transposition which contains the given
+            cycles, and fixes elements not in the cycles
+
+            May result in nonsense if cycles are not valid or if they
+            are overlapping.
+            """
+            values = [i for i in range(1, n + 1)]
+            for cycle in cycles:
+                for i in range(len(cycle)):
+                    values[cycle[i] - 1] = cycle[(i + 1) % len(cycle)]
+            return Symmetric(values)
+
+        @classmethod
+        def __iter__(cls):
+            return map(
+                lambda x: cls(list(x)),
+                itertools.permutations([i for i in range(1, n + 1)]),
+            )
+
+        # Group-theoretic manipulations
+
+        def __mul__(self, other):
+            try:
+                return Symmetric([self(other(i)) for i in range(1, n + 1)])
+            except AttributeError:
+                return NotImplemented
+
+        def __truediv__(self, other):
+            try:
+                return self * other.multiplicative_inverse()
+            except AttributeError:
+                return NotImplemented
+
+        def __pow__(self, p):
+            # Exponentiation by squaring
+            value = Symmetric.e
+            step = Symmetric.e
+            while p > 0:
+                step *= self
+                if p & 1 == 1:
+                    value *= step
+                p >>= 1
+            return value
+
+        def __eq__(self, other):
+            return self._values == other._values and n == other.get_order()
+
+        def multiplicative_inverse(self):
+            """Compute the multiplicative inverse, raising an error if this value is not a unit"""
+            values = [0 for _ in range(n)]
+            for i in range(1, n + 1):
+                values[self(i) - 1] = i
+            return Symmetric(self.values)
+
+        # Action on set of n points
+
+        def __call__(self, argument):
+            return self._values[argument - 1]
+
+        def get_cycles(self):
+            covered = [False] * (n + 1)
+            cycles = []
+            for i in range(1, n + 1):
+                if covered[i]:
+                    continue
+                cycle = []
+                while i not in cycle:
+                    cycle.append(i)
+                    covered[i] = True
+                    i = self(i)
+                cycles.append(cycle)
+            return cycles
+
+        # Display control
+
+        def __str__(self):
+            cycles = [c for c in self.get_cycles() if len(c) > 1]
+            if cycles:
+                return " ".join(
+                    ("(" + " ".join(map(str, cycle)) + ")") for cycle in cycles
+                )
+            else:
+                return "e"
+
+        def __repr__(self):
+            return f"SymmetricGroup({n})({self._values})"
+
+        # Type-level manipulations
+
+        @classmethod
+        def get_order(cls):
+            """Get the order of this ring"""
+            return n
+
+    Symmetric.e = Symmetric([i for i in range(1, n + 1)])
+
+    return Symmetric
