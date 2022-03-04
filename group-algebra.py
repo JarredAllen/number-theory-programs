@@ -40,7 +40,7 @@ def GroupRing(R, G):
             if type(value) == cls:
                 # If projecting an element of the group ring, return it directly
                 return value
-            elif type(value) == R:
+            elif type(value) == R or type(value) == int:
                 # If projecting an element of the base ring, project
                 return cls(value)
             try:
