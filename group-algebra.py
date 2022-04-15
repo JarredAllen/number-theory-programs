@@ -26,6 +26,8 @@ def GroupRing(R, G):
             """
             if type(value) == list:
                 self._values = [R(v) for v in value]
+            elif type(value) == G:
+                self._values = [1 if g == value else 0 for g in G.__iter__()]
             else:
                 r = R(value)
                 self._values = [r if g == G.e else 0 for g in G.__iter__()]
@@ -40,7 +42,7 @@ def GroupRing(R, G):
             if type(value) == cls:
                 # If projecting an element of the group ring, return it directly
                 return value
-            elif type(value) == R or type(value) == int:
+            elif type(value) == R or type(value) == int or type(value):
                 # If projecting an element of the base ring, project
                 return cls(value)
             try:
@@ -60,6 +62,10 @@ def GroupRing(R, G):
             except TypeError:
                 pass
             raise TypeError(f"{value} is not from a subring of {R}{G}")
+
+        def inner_product(self, other):
+            """Take the inner product of the two group ring elements"""
+            return sum(self(i) * other(i).conjugate() for i in G.__iter__())
 
         # Manipulate values in the ring
 
@@ -99,6 +105,19 @@ def GroupRing(R, G):
             return all(
                 self(g) == Ring.natural_project_from(other)(g) for g in G.__iter__()
             )
+
+        def cross_correlate(self, other):
+            convolve_other = sum(
+                (
+                    Ring(a.conjugate()) * Ring(g.multiplicative_inverse())
+                    for (a, g) in zip(other._values, G.__iter__())
+                ),
+                start=Ring(0),
+            )
+            return self * convolve_other
+
+        def norm_squared(self):
+            return sum(abs(r) ** 2 for r in self._values)
 
         # Represent as strings
 
@@ -158,10 +177,6 @@ def CyclicGroupRing(n):
             return cls.from_function(
                 lambda i: sum(d * c(i) for (c, d) in zip(cls.get_characters(), dft)) / n
             )
-
-        def inner_product(self, other):
-            """Take the inner product of the two group ring elements"""
-            return sum(self(i) * other(i).conjugate() for i in base_group.__iter__())
 
         def get_dft(self):
             """Get the Discrete Fourier transform of this group ring element"""

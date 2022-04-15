@@ -14,7 +14,7 @@ def CyclicGroup(n):
         # Functions to make one
 
         def __init__(self, a):
-            self._a = r % n
+            self._a = a % n
 
         @classmethod
         def natural_project_from(cls, value):
@@ -22,7 +22,7 @@ def CyclicGroup(n):
             m = n // value.get_order()
             if m * value.get_order() != n:
                 raise TypeError(f"{value} is not from a subgroup of {cls.__doc__}")
-            return Modular(value.a * m)
+            return Cyclic(value.a * m)
 
         @classmethod
         def __iter__(self):
@@ -268,7 +268,7 @@ def SymmetricGroup(n):
             values = [0 for _ in range(n)]
             for i in range(1, n + 1):
                 values[self(i) - 1] = i
-            return Symmetric(self.values)
+            return Symmetric(values)
 
         # Action on set of n points
 
